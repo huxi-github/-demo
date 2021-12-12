@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-pthread_cond_t cond1,cond2,cond3; //类似一个 全局 的votatile  flag
+pthread_cond_t cond1,cond2,cond3; //类似一个 全局 的votatile flag
 pthread_mutex_t the_mutex;
 
 volatile unsigned int buffer = 0;
@@ -18,7 +18,7 @@ void *printer1(void *ptr){
     buffer++;
         sleep(1);
         printf("printer1 pthread  print %d.\n", 1);
-        pthread_cond_signal(&cond2);//唤醒两个消费者线程
+        pthread_cond_signal(&cond2);//唤醒下一个线程 [线程2]
         pthread_mutex_unlock(&the_mutex);
     }
     pthread_exit(0);
@@ -33,7 +33,7 @@ void *printer2(void *ptr){
         printf("printer2 thread  解除 wait ...\n");
         printf("printer2 pthread  print %d.\n", 2);
    buffer++;
-        pthread_cond_signal(&cond3);
+        pthread_cond_signal(&cond3); //唤醒下一个线程 [线程3]
         pthread_mutex_unlock(&the_mutex);
     }
     pthread_exit(0);
@@ -48,7 +48,7 @@ void *printer3(void *ptr){
         printf("printer3 pthread  print %d.\n", 3);
         buffer++;
  
-        pthread_cond_signal(&cond1);
+        pthread_cond_signal(&cond1); //唤醒下一个线程 [线程1]
         pthread_mutex_unlock(&the_mutex);
     }
     pthread_exit(0);
@@ -64,7 +64,6 @@ int main(void){
     pthread_create(&th1, 0, printer1, 0);
     pthread_create(&th2, 0, printer2, 0);
     pthread_create(&th3, 0, printer3, 0);
-    // printf("3 thread  init ...");
     pthread_join(th1, 0);
     pthread_join(th2, 0);
     pthread_join(th3, 0);
